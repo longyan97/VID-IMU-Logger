@@ -388,8 +388,24 @@ public class Camera2Proxy {
         mPreviewRequestBuilder.set(CaptureRequest.SENSOR_SENSITIVITY, desiredIso);
         Timber.d("ISO set to %d", desiredIso);
 
+
+        setCamParamsRS();
+
+    }
+
+    private void setCamParamsRS() {
         mPreviewRequestBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, oisMode);
         mPreviewRequestBuilder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, eisMode);
+
+        mPreviewRequestBuilder.set(CaptureRequest.COLOR_CORRECTION_ABERRATION_MODE, 0);  // off
+        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_AE_ANTIBANDING_MODE, 0);
+        mPreviewRequestBuilder.set(CaptureRequest.CONTROL_EFFECT_MODE, 0);
+        mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, 0);
+        mPreviewRequestBuilder.set(CaptureRequest.HOT_PIXEL_MODE, 0);
+        mPreviewRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, 0);
+        mPreviewRequestBuilder.set(CaptureRequest.EDGE_MODE, 0);
+
+
 
     }
 
@@ -403,8 +419,8 @@ public class Camera2Proxy {
             mPreviewRequestBuilder.set(
                     CaptureRequest.CONTROL_AWB_MODE, CameraMetadata.CONTROL_AWB_MODE_AUTO);
 
-            mPreviewRequestBuilder.set(CaptureRequest.LENS_OPTICAL_STABILIZATION_MODE, oisMode);
-            mPreviewRequestBuilder.set(CaptureRequest.CONTROL_VIDEO_STABILIZATION_MODE, eisMode);
+            setCamParamsRS();
+
 
             // We disable customizing focus distance by user input because
             // it is less flexible than tap to focus.

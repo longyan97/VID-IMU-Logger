@@ -34,7 +34,8 @@ import timber.log.Timber;
  */
 public class CameraUtils {
     private static final String TAG = CameraCaptureActivity.TAG;
-    private static final float BPP = 0.25f;
+//    private static final float BPP = 0.25f;
+    private static final float BPP = 1f;
 
     /**
      * In this sample, we choose a video size with 3x4 aspect ratio. Also, we don't use sizes
