@@ -195,7 +195,7 @@ class CameraCaptureActivityBase extends Activity implements SurfaceTexture.OnFra
         String folderName = dateFormat.format(new Date());
         String dir1 = getFilesDir().getAbsolutePath();
         String dir2 = Environment.getExternalStorageDirectory().
-                getAbsolutePath() + File.separator + "mars_logger";
+                getAbsolutePath() + File.separator + "RollingShutter";
 
         String dir3 = getExternalFilesDir(
                 Environment.getDataDirectory().getAbsolutePath()).getAbsolutePath();
@@ -207,7 +207,8 @@ class CameraCaptureActivityBase extends Activity implements SurfaceTexture.OnFra
         // fails, like you denied it. You must go into Settings, apps, select
         // your application and flip the permission switch on."
         // ref: https://stackoverflow.com/questions/40087355/android-mkdirs-not-working
-        String outputDir = dir3 + File.separator + folderName;
+//        String outputDir = dir3 + File.separator + folderName;
+        String outputDir = dir2 + File.separator + folderName;
         (new File(outputDir)).mkdirs();
         return outputDir;
     }

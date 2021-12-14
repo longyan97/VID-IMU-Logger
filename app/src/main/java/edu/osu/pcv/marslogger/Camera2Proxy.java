@@ -70,9 +70,9 @@ public class Camera2Proxy {
     private SurfaceTexture mPreviewSurfaceTexture = null;
     private OrientationEventListener mOrientationEventListener;
 
-    final int oisMode = 0;
+    final int oisMode = 1;
     final int eisMode = 0;
-    int dispcount = 0;
+    long dispcount = 0;
 
     private int mDisplayRotate = 0;
     private int mDeviceOrientation = 0;
@@ -558,7 +558,7 @@ public class Camera2Proxy {
                                        @NonNull CaptureRequest request,
                                        @NonNull TotalCaptureResult result) {
 
-            if (dispcount % 300 == 0) {
+            if (dispcount  == 0) {
                 int eisOn = result.get(CaptureResult.CONTROL_VIDEO_STABILIZATION_MODE);
                 int oisOn = result.get(CaptureResult.LENS_OPTICAL_STABILIZATION_MODE);
                 String msg = "count: " + dispcount + ", eis: " + eisOn + ", ois: " + oisOn;
