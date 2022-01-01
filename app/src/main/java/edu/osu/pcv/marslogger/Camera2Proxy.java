@@ -70,7 +70,7 @@ public class Camera2Proxy {
     private SurfaceTexture mPreviewSurfaceTexture = null;
     private OrientationEventListener mOrientationEventListener;
 
-    final int oisMode = 1;
+    final int oisMode = 0;
     final int eisMode = 0;
     long dispcount = 0;
 
@@ -416,8 +416,10 @@ public class Camera2Proxy {
             // Set control elements, we want auto white balance
             mPreviewRequestBuilder.set(
                     CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+//            mPreviewRequestBuilder.set(
+//                    CaptureRequest.CONTROL_AWB_MODE, CameraMetadata.CONTROL_AWB_MODE_AUTO);
             mPreviewRequestBuilder.set(
-                    CaptureRequest.CONTROL_AWB_MODE, CameraMetadata.CONTROL_AWB_MODE_AUTO);
+                    CaptureRequest.CONTROL_AWB_MODE, CameraMetadata.CONTROL_AWB_MODE_OFF);
 
             setCamParamsRS();
 
