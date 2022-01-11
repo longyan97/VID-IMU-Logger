@@ -402,7 +402,9 @@ public class Camera2Proxy {
         mPreviewRequestBuilder.set(CaptureRequest.CONTROL_EFFECT_MODE, 0);
         mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, 0);
         mPreviewRequestBuilder.set(CaptureRequest.HOT_PIXEL_MODE, 0);
-        mPreviewRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, 0);
+//        mPreviewRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, 0);
+        // set noise reduction to minimal for Samsung S9
+        mPreviewRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, CaptureRequest.NOISE_REDUCTION_MODE_MINIMAL);
         mPreviewRequestBuilder.set(CaptureRequest.EDGE_MODE, 0);
 
 
