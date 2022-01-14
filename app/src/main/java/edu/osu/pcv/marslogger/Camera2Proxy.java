@@ -72,6 +72,7 @@ public class Camera2Proxy {
 
     final int oisMode = 0;
     final int eisMode = 0;
+    final int mISO = 200;
     long dispcount = 0;
 
     private int mDisplayRotate = 0;
@@ -114,8 +115,6 @@ public class Camera2Proxy {
 
     // https://stackoverflow.com/questions/3786825/volatile-boolean-vs-atomicboolean
     private volatile boolean mRecordingMetadata = false;
-
-    private FocalLengthHelper mFocalLengthHelper = new FocalLengthHelper();
 
     public boolean mSupportSnapshot = false; // Previewing both video frames and image frames slows down video frame rate.
 
@@ -234,9 +233,6 @@ public class Camera2Proxy {
             Size[] videoSizeChoices = map.getOutputSizes(MediaRecorder.class);
             mVideoSize = CameraUtils.chooseVideoSize(videoSizeChoices, width, height, width);
 
-            mFocalLengthHelper.setLensParams(mCameraCharacteristics);
-            mFocalLengthHelper.setmImageSize(mVideoSize);
-
             mPreviewSize = CameraUtils.chooseOptimalSize(map.getOutputSizes(SurfaceTexture.class),
                     width, height, mVideoSize);
             Timber.d("Video size %s preview size %s.",
@@ -252,14 +248,18 @@ public class Camera2Proxy {
 
         final int[] oisOptions  = mCameraCharacteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_OPTICAL_STABILIZATION);
         final int[] eisOptions  = mCameraCharacteristics.get(CameraCharacteristics.CONTROL_AVAILABLE_VIDEO_STABILIZATION_MODES);
-        if (!(eisOptions[0] == 0 && eisOptions[1] == 1)){
-            Log.e("WTF", "EIS not supported!");
-            mActivity.finish();
+
+        String msg = "";
+        if ((eisOptions.length == 1) || (!(eisOptions[0] == 0 && eisOptions[1] == 1))){
+            Log.e("WTF", "EIS not supported! ");
+            msg += "EIS not supported! ";
         }
-        if (!(oisOptions[0] == 0 && oisOptions[1] == 1)){
+        if ((oisOptions.length == 1) || (!(oisOptions[0] == 0 && oisOptions[1] == 1))){
             Log.e("WTF", "OIS not supported!");
-            mActivity.finish();
+            msg += "OIS not supported! ";
         }
+
+        Toast.makeText(mActivity, msg, Toast.LENGTH_LONG).show();
 
     }
 
@@ -373,7 +373,7 @@ public class Camera2Proxy {
 
 
         // !!!!!! fixing iso here
-        desiredIso = 200;
+        desiredIso = mISO;
 
 
         // fix exposure
@@ -576,65 +576,26 @@ public class Camera2Proxy {
                                        @NonNull CaptureRequest request,
                                        @NonNull TotalCaptureResult result) {
 
-            if (dispcount  == 0) {
-                int eisOn = result.get(CaptureResult.CONTROL_VIDEO_STABILIZATION_MODE);
-                int oisOn = result.get(CaptureResult.LENS_OPTICAL_STABILIZATION_MODE);
-                String msg = "count: " + dispcount + ", eis: " + eisOn + ", ois: " + oisOn;
-                Toast.makeText(mActivity, msg, Toast.LENGTH_LONG).show();
-            }
-            dispcount += 1;
-
+            int eisOn = result.get(CaptureResult.CONTROL_VIDEO_STABILIZATION_MODE);
+            int oisOn = result.get(CaptureResult.LENS_OPTICAL_STABILIZATION_MODE);
 
             long unixTime = System.currentTimeMillis();
             process(result);
 
-            Long timestamp = result.get(CaptureResult.SENSOR_TIMESTAMP);
+            Integer iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
             Long number = result.getFrameNumber();
             Long exposureTimeNs = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
-
-            Long frmDurationNs = result.get(CaptureResult.SENSOR_FRAME_DURATION);
-            Long frmReadoutNs = result.get(CaptureResult.SENSOR_ROLLING_SHUTTER_SKEW);
-            Integer iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
             if (expoStats.size() > kMaxExpoSamples) {
                 expoStats.subList(0, kMaxExpoSamples / 2).clear();
             }
             expoStats.add(new NumExpoIso(number, exposureTimeNs, iso));
 
-            Float fl = result.get(CaptureResult.LENS_FOCAL_LENGTH);
-
-            Float fd = result.get(CaptureResult.LENS_FOCUS_DISTANCE);
 
             Integer afMode = result.get(CaptureResult.CONTROL_AF_MODE);
 
-            Rect rect = result.get(CaptureResult.SCALER_CROP_REGION);
-            mFocalLengthHelper.setmFocalLength(fl);
-            mFocalLengthHelper.setmFocusDistance(fd);
-            mFocalLengthHelper.setmCropRegion(rect);
-            SizeF sz_focal_length = mFocalLengthHelper.getFocalLengthPixel();
-            String delimiter = ",";
-            StringBuilder sb = new StringBuilder();
-            sb.append(timestamp);
-            sb.append(delimiter + sz_focal_length.getWidth());
-            sb.append(delimiter + sz_focal_length.getHeight());
-            sb.append(delimiter + number);
-            sb.append(delimiter + exposureTimeNs);
-            sb.append(delimiter + frmDurationNs);
-            sb.append(delimiter + frmReadoutNs);
-            sb.append(delimiter + iso);
-            sb.append(delimiter + fl);
-            sb.append(delimiter + fd);
-            sb.append(delimiter + afMode);
-            sb.append(delimiter + unixTime + "000000");
-            String frame_info = sb.toString();
-            if (mRecordingMetadata) {
-                try {
-                    mFrameMetadataWriter.write(frame_info + "\n");
-                } catch (IOException err) {
-                    Timber.e(err, "Error writing captureResult");
-                }
-            }
+
             ((CameraCaptureActivityBase) mActivity).updateCaptureResultPanel(
-                    sz_focal_length.getWidth(), exposureTimeNs, afMode);
+                    iso, exposureTimeNs, afMode, oisOn, eisOn);
         }
 
     };

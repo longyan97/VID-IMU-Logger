@@ -41,7 +41,8 @@
         android:layout_alignStart="@id/cameraPreview_afl"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
         android:text="[?]"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:textColor="#F00"/>
 
     <TextView
         android:id="@+id/captureResult_text"
@@ -49,7 +50,9 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/cameraParams_text"
         android:layout_below="@id/cameraParams_text"
-        android:text="focal length : exposure time" />
+        android:text="iso : exposure time"
+        android:textColor="#F00" />
+
 
     <TextView
         android:id="@+id/cameraOutputDirLabel"
@@ -57,7 +60,8 @@
         android:layout_height="wrap_content"
         android:layout_alignStart="@id/cameraParams_text"
         android:layout_below="@id/captureResult_text"
-        android:text="@string/cameraOutputDirLabel_text" />
+        android:text="@string/cameraOutputDirLabel_text"
+        android:textColor="#F00"/>
 
     <TextView
         android:id="@+id/cameraOutputDir_text"
