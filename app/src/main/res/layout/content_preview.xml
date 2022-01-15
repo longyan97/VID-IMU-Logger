@@ -71,7 +71,8 @@
         android:layout_alignBottom="@id/cameraOutputDirLabel"
         android:layout_toEndOf="@id/cameraOutputDirLabel"
         android:paddingStart="4dp"
-        android:text="@string/cameraOutputDir_text" />
+        android:text="@string/cameraOutputDir_text"
+        android:textColor="#F00"/>
 
     <TextView
         android:id="@+id/numSnapshotLabel"

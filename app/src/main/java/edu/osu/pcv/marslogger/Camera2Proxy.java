@@ -72,8 +72,8 @@ public class Camera2Proxy {
 
     final int oisMode = 0;
     final int eisMode = 0;
-    final int mISO = 200;
-    long dispcount = 0;
+    final int mISO = 400;
+    final int mNRmode = CameraMetadata.NOISE_REDUCTION_MODE_MINIMAL;   // _OFF, _FAST, _HIGH_QUALITY, _MINIMAL, _ZERO_SHUTTER_LAG
 
     private int mDisplayRotate = 0;
     private int mDeviceOrientation = 0;
@@ -402,7 +402,7 @@ public class Camera2Proxy {
         mPreviewRequestBuilder.set(CaptureRequest.CONTROL_EFFECT_MODE, 0);
         mPreviewRequestBuilder.set(CaptureRequest.FLASH_MODE, 0);
         mPreviewRequestBuilder.set(CaptureRequest.HOT_PIXEL_MODE, 0);
-        mPreviewRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, 0);
+        mPreviewRequestBuilder.set(CaptureRequest.NOISE_REDUCTION_MODE, mNRmode);
         mPreviewRequestBuilder.set(CaptureRequest.EDGE_MODE, 0);
 
 
