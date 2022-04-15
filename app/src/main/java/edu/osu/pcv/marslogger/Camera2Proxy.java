@@ -2,6 +2,7 @@ package edu.osu.pcv.marslogger;
 
 import android.annotation.SuppressLint;
 import android.annotation.TargetApi;
+
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -71,8 +72,8 @@ public class Camera2Proxy {
     private OrientationEventListener mOrientationEventListener;
 
     final int oisMode = 0;
-    final int eisMode = 0;
-    final int mISO = 3800;
+    final int eisMode = 1;
+    final int mISO = 1600;
     final int mNRmode = CameraMetadata.NOISE_REDUCTION_MODE_OFF;   // _OFF, _FAST, _HIGH_QUALITY, _MINIMAL, _ZERO_SHUTTER_LAG. min for s9, off for others
     final String mCamId = "0";
 

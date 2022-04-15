@@ -134,12 +134,12 @@ import timber.log.Timber;
  */
 
 class DesiredCameraSetting {
-//    static final int mDesiredFrameWidth = 640;
-//    static final int mDesiredFrameHeight = 360;
+//    static final int mDesiredFrameWidth = 160;
+//    static final int mDesiredFrameHeight = 120;
     static final int mDesiredFrameWidth = 1920;
     static final int mDesiredFrameHeight = 1080;
-//    static final Long mDesiredExposureTime = 1000000L; // nanoseconds
-    static final Long mDesiredExposureTime = 33000000L; // nanoseconds
+    static final Long mDesiredExposureTime = 1000000L; // nanoseconds
+//    static final Long mDesiredExposureTime = 33000000L; // nanoseconds
     static final String mDesiredFrameSize = mDesiredFrameWidth +
             "x" + mDesiredFrameHeight;
 }
