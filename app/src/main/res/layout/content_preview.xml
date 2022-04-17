@@ -18,10 +18,10 @@
         android:id="@+id/cameraPreview_afl"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_alignParentBottom="true"
+        android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="4dp"
-        android:layout_below="@id/LinearLayoutHeader"
+        android:layout_above="@id/LinearLayoutHeader"
         android:layout_centerInParent="true">
 
         <edu.osu.pcv.marslogger.SampleGLView
@@ -33,63 +33,63 @@
 
     <!-- these overlap with the SurfaceView; by default, it's underneath the UI layer -->
 
-    <TextView
-        android:id="@+id/cameraParams_text"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:id="@+id/LinearLayoutHeader"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_below="@id/LinearLayoutHeader"
-        android:layout_alignStart="@id/cameraPreview_afl"
+        android:layout_marginTop="@dimen/activity_top_margin"
+        android:orientation="vertical"
         android:layout_marginStart="@dimen/activity_horizontal_margin"
-        android:text="[?]"
-        android:textAppearance="?android:attr/textAppearanceMedium"
-        android:textColor="#F00"/>
+        android:layout_alignParentTop="true">
 
-    <TextView
-        android:id="@+id/captureResult_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@id/cameraParams_text"
-        android:layout_below="@id/cameraParams_text"
-        android:text="iso : exposure time"
-        android:textColor="#F00" />
+        <TextView
+            android:id="@+id/cameraParams_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="[?]"
+            android:textAppearance="?android:attr/textAppearanceMedium"
+            android:textColor="#F00"/>
+
+        <TextView
+            android:id="@+id/captureResult_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignStart="@id/cameraParams_text"
+            android:layout_below="@id/cameraParams_text"
+            android:text="iso : exposure time"
+            android:textColor="#F00" />
 
 
-    <TextView
-        android:id="@+id/cameraOutputDirLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@id/cameraParams_text"
-        android:layout_below="@id/captureResult_text"
-        android:text="@string/cameraOutputDirLabel_text"
-        android:textColor="#F00"/>
+<!--        <TextView-->
+<!--            android:id="@+id/cameraOutputDirLabel"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_alignStart="@id/cameraParams_text"-->
+<!--            android:layout_below="@id/captureResult_text"-->
+<!--            android:text="@string/cameraOutputDirLabel_text"-->
+<!--            android:textColor="#F00"/>-->
 
-    <TextView
-        android:id="@+id/cameraOutputDir_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/cameraOutputDirLabel"
-        android:layout_alignBottom="@id/cameraOutputDirLabel"
-        android:layout_toEndOf="@id/cameraOutputDirLabel"
-        android:paddingStart="4dp"
-        android:text="@string/cameraOutputDir_text"
-        android:textColor="#F00"/>
+        <TextView
+            android:id="@+id/cameraOutputDir_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/cameraOutputDir_text"
+            android:textColor="#F00"/>
 
-    <TextView
-        android:id="@+id/numSnapshotLabel"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignStart="@id/cameraParams_text"
-        android:layout_below="@id/cameraOutputDirLabel"
-        android:text="@string/numSnapshotLabel" />
+<!--        <TextView-->
+<!--            android:id="@+id/numSnapshotLabel"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"-->
+<!--            android:layout_alignStart="@id/cameraParams_text"-->
+<!--            android:layout_below="@id/cameraOutputDirLabel"-->
+<!--            android:text="@string/numSnapshotLabel" />-->
 
-    <TextView
-        android:id="@+id/numSnapshot_text"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/numSnapshotLabel"
-        android:layout_alignBottom="@id/numSnapshotLabel"
-        android:layout_toEndOf="@id/numSnapshotLabel"
-        android:paddingStart="4dp"
-        android:text="@string/numSnapshotText" />
+        <TextView
+            android:id="@+id/numSnapshot_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/numSnapshotText" />
+
+    </LinearLayout>
 
 </merge>

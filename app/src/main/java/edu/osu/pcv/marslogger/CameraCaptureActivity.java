@@ -138,7 +138,7 @@ class DesiredCameraSetting {
 //    static final int mDesiredFrameHeight = 120;
     static final int mDesiredFrameWidth = 1920;
     static final int mDesiredFrameHeight = 1080;
-    static final Long mDesiredExposureTime = 1000000L; // nanoseconds
+    static final Long mDesiredExposureTime = 10000000L; // nanoseconds
 //    static final Long mDesiredExposureTime = 33000000L; // nanoseconds
     static final String mDesiredFrameSize = mDesiredFrameWidth +
             "x" + mDesiredFrameHeight;
@@ -295,6 +295,9 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
     private CameraHandler mCameraHandler;
     private boolean mRecordingEnabled;      // controls button state
 
+    private boolean capIMU = true;
+    private IMUManager mImuManager;
+    private TimeBaseManager mTimeBaseManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -347,7 +350,10 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
             mCameraHandler.sendMessage(
                     mCameraHandler.obtainMessage(CameraHandler.MSG_MANUAL_FOCUS, focusConfig));
         });
-
+        if (capIMU && mImuManager == null) {
+            mImuManager = new IMUManager(this);
+            mTimeBaseManager = new TimeBaseManager();
+        }
         mKeyCameraParamsText = (TextView) findViewById(R.id.cameraParams_text);
         mCaptureResultText = (TextView) findViewById(R.id.captureResult_text);
         mOutputDirText = (TextView) findViewById(R.id.cameraOutputDir_text);
@@ -378,6 +384,9 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
                 mRenderer.setVideoFrameSize(mVideoFrameWidth, mVideoFrameHeight);
             }
         });
+        if (capIMU){
+            mImuManager.register();
+        }
     }
 
     @Override
@@ -398,6 +407,9 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
             }
         });
         mGLView.onPause();
+        if (capIMU){
+            mImuManager.unregister();
+        }
         Timber.d("onPause complete");
     }
 
@@ -442,10 +454,18 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
             mRenderer.resetOutputFiles(outputFile, metaFile); // this will not cause sync issues
             String inertialFile = outputDir + File.separator + "gyro_accel.csv";
             String edgeEpochFile = outputDir + File.separator + "edge_epochs.txt";
+            if (capIMU){
+                mTimeBaseManager.startRecording(edgeEpochFile, mCamera2Proxy.getmTimeSourceValue());
+                mImuManager.startRecording(inertialFile);
+            }
             mCamera2Proxy.startRecordingCaptureResult(
                     outputDir + File.separator + "movie_metadata.csv");
         } else {
             mCamera2Proxy.stopRecordingCaptureResult();
+            if (capIMU){
+                mImuManager.stopRecording();
+                mTimeBaseManager.stopRecording();
+            }
         }
         mGLView.queueEvent(new Runnable() {
             @Override
