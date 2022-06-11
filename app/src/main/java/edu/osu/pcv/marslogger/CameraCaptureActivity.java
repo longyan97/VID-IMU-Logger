@@ -41,6 +41,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -159,6 +160,9 @@ class CameraCaptureActivityBase extends Activity implements SurfaceTexture.OnFra
 
     protected TextView mKeyCameraParamsText;
     protected TextView mCaptureResultText;
+    protected EditText mNameText;
+
+
 
     protected int mCameraPreviewWidth, mCameraPreviewHeight;
     protected int mVideoFrameWidth, mVideoFrameHeight;
@@ -191,9 +195,13 @@ class CameraCaptureActivityBase extends Activity implements SurfaceTexture.OnFra
     }
 
     protected String renewOutputDir() {
+        String personName = mNameText.getText().toString();
+        if (!personName.isEmpty()){
+            personName += "_";
+        }
         SimpleDateFormat dateFormat =
                 new SimpleDateFormat("yyyy_MM_dd_HH_mm_ss");
-        String folderName = dateFormat.format(new Date());
+        String folderName = personName + dateFormat.format(new Date());
         String dir1 = getFilesDir().getAbsolutePath();
         String dir2 = Environment.getExternalStorageDirectory().
                 getAbsolutePath() + File.separator + "RollingShutter";
@@ -252,26 +260,7 @@ class CameraCaptureActivityBase extends Activity implements SurfaceTexture.OnFra
 
     @Override
     public void onFrameAvailable(SurfaceTexture st) {
-        // The SurfaceTexture uses this to signal the availability of a new frame.  The
-        // thread that "owns" the external texture associated with the SurfaceTexture (which,
-        // by virtue of the context being shared, *should* be either one) needs to call
-        // updateTexImage() to latch the buffer.
-        //
-        // Once the buffer is latched, the GLSurfaceView thread can signal the encoder thread.
-        // This feels backward -- we want recording to be prioritized over rendering -- but
-        // since recording is only enabled some of the time it's easier to do it this way.
-        //
-        // Since GLSurfaceView doesn't establish a Looper, this will *probably* execute on
-        // the main UI thread.  Fortunately, requestRender() can be called from any thread,
-        // so it doesn't really matter.
-        if (VERBOSE) Timber.d("ST onFrameAvailable");
-        mGLView.requestRender();
-
-        final String sfps = String.format(Locale.getDefault(), "%.1f FPS",
-                sVideoEncoder.mFrameRate);
-        String previewFacts = mCameraPreviewWidth + "x" + mCameraPreviewHeight + "@" + sfps;
-
-        mKeyCameraParamsText.setText(previewFacts);
+        // implemented by the child instead
     }
 }
 
@@ -299,6 +288,14 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
     private IMUManager mImuManager;
     private TimeBaseManager mTimeBaseManager;
 
+    protected TextView mRecTimerText;
+    protected int mRecordedFrameNum = 0;
+    protected TextView mRecVidsNumText;
+    protected int numRecordedVids = 0;
+
+
+    protected boolean allowManualFocusExp = true;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -307,13 +304,14 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
         setContentView(R.layout.activity_camera_capture);
         mSnapshotMode = false;
-        Spinner spinner = (Spinner) findViewById(R.id.cameraFilter_spinner);
-        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
-                R.array.cameraFilterNames, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        // Apply the adapter to the spinner.
-        spinner.setAdapter(adapter);
-        spinner.setOnItemSelectedListener(this);
+
+//        Spinner spinner = (Spinner) findViewById(R.id.cameraFilter_spinner);
+//        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+//                R.array.cameraFilterNames, android.R.layout.simple_spinner_item);
+//        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+//        // Apply the adapter to the spinner.
+//        spinner.setAdapter(adapter);
+//        spinner.setOnItemSelectedListener(this);
     }
 
     @Override
@@ -342,14 +340,16 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
             mGLView.setRenderer(mRenderer);
             mGLView.setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
         }
-        mGLView.setTouchListener((event) -> {
-            ManualFocusConfig focusConfig =
-                    new ManualFocusConfig(event.getX(), event.getY(), mGLView.getWidth(), mGLView.getHeight());
-            Timber.d(focusConfig.toString());
-            Toast.makeText(getApplicationContext(), "Changing focus point...", Toast.LENGTH_SHORT).show();
-            mCameraHandler.sendMessage(
-                    mCameraHandler.obtainMessage(CameraHandler.MSG_MANUAL_FOCUS, focusConfig));
-        });
+        if (allowManualFocusExp) {
+            mGLView.setTouchListener((event) -> {
+                ManualFocusConfig focusConfig =
+                        new ManualFocusConfig(event.getX(), event.getY(), mGLView.getWidth(), mGLView.getHeight());
+                Timber.d(focusConfig.toString());
+                Toast.makeText(getApplicationContext(), "Changing focus point...", Toast.LENGTH_SHORT).show();
+                mCameraHandler.sendMessage(
+                        mCameraHandler.obtainMessage(CameraHandler.MSG_MANUAL_FOCUS, focusConfig));
+            });
+        }
         if (capIMU && mImuManager == null) {
             mImuManager = new IMUManager(this);
             mTimeBaseManager = new TimeBaseManager();
@@ -357,6 +357,10 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
         mKeyCameraParamsText = (TextView) findViewById(R.id.cameraParams_text);
         mCaptureResultText = (TextView) findViewById(R.id.captureResult_text);
         mOutputDirText = (TextView) findViewById(R.id.cameraOutputDir_text);
+        mRecTimerText = (TextView) findViewById(R.id.timer);
+        mNameText = (EditText) findViewById(R.id.name_input);
+        mRecVidsNumText = (TextView) findViewById(R.id.num_vids_disp);
+
     }
 
     @Override
@@ -411,6 +415,8 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
             mImuManager.unregister();
         }
         Timber.d("onPause complete");
+
+        mRecordedFrameNum = 0;
     }
 
     @Override
@@ -457,11 +463,15 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
             if (capIMU){
                 mTimeBaseManager.startRecording(edgeEpochFile, mCamera2Proxy.getmTimeSourceValue());
                 mImuManager.startRecording(inertialFile);
+                mRecordedFrameNum = 0;
             }
             mCamera2Proxy.startRecordingCaptureResult(
                     outputDir + File.separator + "movie_metadata.csv");
         } else {
+            numRecordedVids ++;
+            mRecVidsNumText.setText("" + numRecordedVids);
             mCamera2Proxy.stopRecordingCaptureResult();
+//            mRecTimerText.setText("0");
             if (capIMU){
                 mImuManager.stopRecording();
                 mTimeBaseManager.stopRecording();
@@ -486,6 +496,41 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
                 R.string.toggleRecordingOff : R.string.toggleRecordingOn;
         toggleRelease.setText(id);
     }
+
+
+
+
+    @Override
+    public void onFrameAvailable(SurfaceTexture st) {
+        // The SurfaceTexture uses this to signal the availability of a new frame.  The
+        // thread that "owns" the external texture associated with the SurfaceTexture (which,
+        // by virtue of the context being shared, *should* be either one) needs to call
+        // updateTexImage() to latch the buffer.
+        //
+        // Once the buffer is latched, the GLSurfaceView thread can signal the encoder thread.
+        // This feels backward -- we want recording to be prioritized over rendering -- but
+        // since recording is only enabled some of the time it's easier to do it this way.
+        //
+        // Since GLSurfaceView doesn't establish a Looper, this will *probably* execute on
+        // the main UI thread.  Fortunately, requestRender() can be called from any thread,
+        // so it doesn't really matter.
+        if (VERBOSE) Timber.d("ST onFrameAvailable");
+        mGLView.requestRender();
+
+        final String sfps = String.format(Locale.getDefault(), "%.1f FPS",
+                sVideoEncoder.mFrameRate);
+        String previewFacts = mCameraPreviewWidth + "x" + mCameraPreviewHeight + "@" + sfps;
+
+        mKeyCameraParamsText.setText(previewFacts);
+
+
+        if (mRecordingEnabled){
+            mRecordedFrameNum ++;
+            mRecTimerText.setText(""+(int) Math.floor(mRecordedFrameNum/30));
+        }
+
+    }
+
 
 }
 

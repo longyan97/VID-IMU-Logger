@@ -29,6 +29,8 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_gravity="center" />
+
+
     </edu.osu.pcv.marslogger.AspectFrameLayout>
 
     <!-- these overlap with the SurfaceView; by default, it's underneath the UI layer -->
@@ -39,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="@dimen/activity_top_margin"
         android:orientation="vertical"
-        android:layout_marginStart="@dimen/activity_horizontal_margin"
+        android:layout_marginStart="60dp"
         android:layout_alignParentTop="true">
 
         <TextView
@@ -90,6 +92,39 @@
             android:layout_height="wrap_content"
             android:text="@string/numSnapshotText" />
 
+
+
     </LinearLayout>
+
+    <TextView
+        android:id="@+id/person_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="400dp"
+        android:text="Person"/>
+
+    <EditText
+        android:id="@+id/name_input"
+        android:layout_height="wrap_content"
+        android:layout_width="55dp"
+        android:layout_below="@id/person_name"
+        android:cursorVisible="false"
+        android:inputType="text"/>
+
+    <TextView
+        android:id="@+id/num_vids"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="500dp"
+        android:text="No. Vids"/>
+    <TextView
+        android:id="@+id/num_vids_disp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@id/num_vids"
+        android:layout_marginStart="20dp"
+        android:text="0"/>
+
+
 
 </merge>

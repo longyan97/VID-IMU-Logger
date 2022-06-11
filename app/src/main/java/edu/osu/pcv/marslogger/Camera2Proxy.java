@@ -162,10 +162,9 @@ public class Camera2Proxy {
             }
             mFrameMetadataWriter = new BufferedWriter(
                     new FileWriter(captureResultFile, true));
-            String header = "Timestamp[nanosec],fx[px],fy[px],Frame No.," +
-                    "Exposure time[nanosec],Sensor frame duration[nanosec]," +
-                    "Frame readout time[nanosec]," +
-                    "ISO,Focal length,Focus distance,AF mode,Unix time[nanosec]";
+            String header = "Timestamp[nanosec],Frame No.," +
+                    "Exposure time[nanosec]," +
+                    "ISO,AF mode,OIS, EIS";
 
             mFrameMetadataWriter.write(header + "\n");
             mRecordingMetadata = true;
@@ -348,35 +347,34 @@ public class Camera2Proxy {
         Long exposureNanos = DesiredCameraSetting.mDesiredExposureTime;
         Long desiredIsoL = 30L * 30000000L / exposureNanos;
         Integer desiredIso = desiredIsoL.intValue();
-        if (!expoStats.isEmpty()) {
-            int index = expoStats.size() / 2;
-            Long actualExpo = expoStats.get(index).mExposureNanos;
-            Integer actualIso = expoStats.get(index).mIso;
-            if (actualExpo != null && actualIso != null) {
-                if (actualExpo <= exposureNanos) {
-                    exposureNanos = actualExpo;
-                    desiredIso = actualIso;
-                } else {
-                    desiredIsoL = actualIso * actualExpo / exposureNanos;
-                    desiredIso = desiredIsoL.intValue();
-                }
-            } // else may occur on an emulated device.
-        }
 
-        boolean manualControl = mSharedPreferences.getBoolean("switchManualControl", false);
-        if (manualControl) {
-            float exposureTimeMs = (float) exposureNanos / 1e6f;
-            String exposureTimeMsStr = mSharedPreferences.getString(
-                    "prefExposureTime", String.valueOf(exposureTimeMs));
-            exposureNanos = (long) (Float.parseFloat(exposureTimeMsStr) * 1e6f);
-            String desiredIsoStr = mSharedPreferences.getString("prefISO", String.valueOf(desiredIso));
-            desiredIso = Integer.parseInt(desiredIsoStr);
-        }
+//        if (!expoStats.isEmpty()) {
+//            int index = expoStats.size() / 2;
+//            Long actualExpo = expoStats.get(index).mExposureNanos;
+//            Integer actualIso = expoStats.get(index).mIso;
+//            if (actualExpo != null && actualIso != null) {
+//                if (actualExpo <= exposureNanos) {
+//                    exposureNanos = actualExpo;
+//                    desiredIso = actualIso;
+//                } else {
+//                    desiredIsoL = actualIso * actualExpo / exposureNanos;
+//                    desiredIso = desiredIsoL.intValue();
+//                }
+//            } // else may occur on an emulated device.
+//        }
+//        boolean manualControl = mSharedPreferences.getBoolean("switchManualControl", false);
+//        if (manualControl) {
+//            float exposureTimeMs = (float) exposureNanos / 1e6f;
+//            String exposureTimeMsStr = mSharedPreferences.getString(
+//                    "prefExposureTime", String.valueOf(exposureTimeMs));
+//            exposureNanos = (long) (Float.parseFloat(exposureTimeMsStr) * 1e6f);
+//            String desiredIsoStr = mSharedPreferences.getString("prefISO", String.valueOf(desiredIso));
+//            desiredIso = Integer.parseInt(desiredIsoStr);
+//        }
 
 
         // !!!!!! fixing iso here
         desiredIso = mISO;
-
 
         // fix exposure
         mPreviewRequestBuilder.set(
@@ -578,26 +576,48 @@ public class Camera2Proxy {
                                        @NonNull CaptureRequest request,
                                        @NonNull TotalCaptureResult result) {
 
-            int eisOn = result.get(CaptureResult.CONTROL_VIDEO_STABILIZATION_MODE);
-            int oisOn = result.get(CaptureResult.LENS_OPTICAL_STABILIZATION_MODE);
 
-            long unixTime = System.currentTimeMillis();
+
             process(result);
 
+            int eisOn = result.get(CaptureResult.CONTROL_VIDEO_STABILIZATION_MODE);
+            int oisOn = result.get(CaptureResult.LENS_OPTICAL_STABILIZATION_MODE);
             Integer iso = result.get(CaptureResult.SENSOR_SENSITIVITY);
             Long number = result.getFrameNumber();
             Long exposureTimeNs = result.get(CaptureResult.SENSOR_EXPOSURE_TIME);
+            Long timestamp = result.get(CaptureResult.SENSOR_TIMESTAMP);
+            Integer afMode = result.get(CaptureResult.CONTROL_AF_MODE);
+
             if (expoStats.size() > kMaxExpoSamples) {
                 expoStats.subList(0, kMaxExpoSamples / 2).clear();
             }
             expoStats.add(new NumExpoIso(number, exposureTimeNs, iso));
 
 
-            Integer afMode = result.get(CaptureResult.CONTROL_AF_MODE);
-
-
             ((CameraCaptureActivityBase) mActivity).updateCaptureResultPanel(
                     iso, exposureTimeNs, afMode, oisOn, eisOn);
+
+
+
+            String delimiter = ",";
+            StringBuilder sb = new StringBuilder();
+            sb.append(timestamp);
+            sb.append(delimiter + number);
+            sb.append(delimiter + exposureTimeNs);
+            sb.append(delimiter + iso);
+            sb.append(delimiter + afMode);
+            sb.append(delimiter + oisOn);
+            sb.append(delimiter + eisOn);
+            String frame_info = sb.toString();
+            if (mRecordingMetadata) {
+                try {
+                    mFrameMetadataWriter.write(frame_info + "\n");
+                } catch (IOException err) {
+                    Timber.e(err, "Error writing captureResult");
+                }
+            }
+
+
         }
 
     };
