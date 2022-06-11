@@ -295,7 +295,7 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
     private CameraHandler mCameraHandler;
     private boolean mRecordingEnabled;      // controls button state
 
-    private boolean capIMU = true;
+    private boolean capIMU = false;
     private IMUManager mImuManager;
     private TimeBaseManager mTimeBaseManager;
 
