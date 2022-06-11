@@ -22,6 +22,7 @@ import android.content.pm.ActivityInfo;
 import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraMetadata;
 
+import android.media.MediaPlayer;
 import android.opengl.EGL14;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -138,7 +139,7 @@ class DesiredCameraSetting {
 //    static final int mDesiredFrameHeight = 120;
     static final int mDesiredFrameWidth = 1920;
     static final int mDesiredFrameHeight = 1080;
-    static final Long mDesiredExposureTime = 10000000L; // nanoseconds
+    static final Long mDesiredExposureTime = 1000000L; // nanoseconds
 //    static final Long mDesiredExposureTime = 33000000L; // nanoseconds
     static final String mDesiredFrameSize = mDesiredFrameWidth +
             "x" + mDesiredFrameHeight;
@@ -299,6 +300,12 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
     private IMUManager mImuManager;
     private TimeBaseManager mTimeBaseManager;
 
+    private MediaPlayer mPlayer;
+
+
+    
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -314,11 +321,22 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
         // Apply the adapter to the spinner.
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
+
+        initAudioPlayer();
+
+    }
+
+    private void initAudioPlayer() {
+        mPlayer = MediaPlayer.create(this, R.raw.chirp);
+        mPlayer.setLooping(true);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+
+
+
         mCamera2Proxy = new Camera2Proxy(this);
         Size previewSize = mCamera2Proxy.configureCamera();
         setLayoutAspectRatio(previewSize);  // updates mCameraPreviewWidth/Height
@@ -446,6 +464,7 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
     public void clickToggleRecording(@SuppressWarnings("unused") View unused) {
         mRecordingEnabled = !mRecordingEnabled;
         if (mRecordingEnabled) {
+
             String outputDir = renewOutputDir();
             String outputFile = outputDir + File.separator + "movie.mp4";
             String metaFile = outputDir + File.separator + "frame_timestamps.txt";
@@ -460,7 +479,17 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
             }
             mCamera2Proxy.startRecordingCaptureResult(
                     outputDir + File.separator + "movie_metadata.csv");
+
+            mPlayer.start();
+
         } else {
+
+            if (mPlayer.isPlaying()) {
+                mPlayer.pause();
+                mPlayer.reset();
+                initAudioPlayer();
+            }
+
             mCamera2Proxy.stopRecordingCaptureResult();
             if (capIMU){
                 mImuManager.stopRecording();
@@ -474,6 +503,7 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
                 mRenderer.changeRecordingState(mRecordingEnabled);
             }
         });
+
         updateControls();
     }
 
