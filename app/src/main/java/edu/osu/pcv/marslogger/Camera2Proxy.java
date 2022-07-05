@@ -73,7 +73,7 @@ public class Camera2Proxy {
 
     final int oisMode = 0;
     final int eisMode = 0;
-    final int mISO = 100;
+    final int mISO = 600;
     final int mNRmode = CameraMetadata.NOISE_REDUCTION_MODE_OFF;   // _OFF, _FAST, _HIGH_QUALITY, _MINIMAL, _ZERO_SHUTTER_LAG. min for s9, off for others
     final String mCamId = "0";
 

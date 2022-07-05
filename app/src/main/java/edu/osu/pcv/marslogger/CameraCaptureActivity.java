@@ -301,6 +301,7 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
     private TimeBaseManager mTimeBaseManager;
 
     private MediaPlayer mPlayer;
+    private boolean intSpeaker = false;
 
 
     
@@ -322,7 +323,9 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
 
-        initAudioPlayer();
+        if (intSpeaker) {
+            initAudioPlayer();
+        }
 
     }
 
@@ -480,11 +483,13 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
             mCamera2Proxy.startRecordingCaptureResult(
                     outputDir + File.separator + "movie_metadata.csv");
 
-            mPlayer.start();
+            if (intSpeaker) {
+                mPlayer.start();
+            }
 
         } else {
 
-            if (mPlayer.isPlaying()) {
+            if (intSpeaker && mPlayer.isPlaying()) {
                 mPlayer.pause();
                 mPlayer.reset();
                 initAudioPlayer();
