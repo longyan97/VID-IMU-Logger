@@ -92,4 +92,24 @@
 
     </LinearLayout>
 
+
+
+
+    <TextView
+        android:id="@+id/file_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="400dp"
+        android:text="File Name"
+        android:textColor="#F00"/>
+
+    <EditText
+        android:id="@+id/name_input"
+        android:layout_height="wrap_content"
+        android:layout_width="400dp"
+        android:layout_below="@id/file_name"
+        android:cursorVisible="false"
+        android:inputType="text"
+        android:textColor="#F00"/>
+
 </merge>

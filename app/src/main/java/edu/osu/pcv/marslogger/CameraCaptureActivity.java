@@ -23,6 +23,7 @@ import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraMetadata;
 
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.opengl.EGL14;
 import android.opengl.GLES20;
 import android.opengl.GLSurfaceView;
@@ -42,6 +43,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -160,6 +162,7 @@ class CameraCaptureActivityBase extends Activity implements SurfaceTexture.OnFra
 
     protected TextView mKeyCameraParamsText;
     protected TextView mCaptureResultText;
+    protected EditText mFileNameText;
 
     protected int mCameraPreviewWidth, mCameraPreviewHeight;
     protected int mVideoFrameWidth, mVideoFrameHeight;
@@ -301,7 +304,7 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
     private TimeBaseManager mTimeBaseManager;
 
     private MediaPlayer mPlayer;
-    private boolean intSpeaker = false;
+    private boolean intSpeaker = true;
 
 
     
@@ -323,16 +326,10 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
         spinner.setAdapter(adapter);
         spinner.setOnItemSelectedListener(this);
 
-        if (intSpeaker) {
-            initAudioPlayer();
-        }
 
     }
 
-    private void initAudioPlayer() {
-        mPlayer = MediaPlayer.create(this, R.raw.chirp);
-        mPlayer.setLooping(true);
-    }
+
 
     @Override
     protected void onStart() {
@@ -378,6 +375,7 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
         mKeyCameraParamsText = (TextView) findViewById(R.id.cameraParams_text);
         mCaptureResultText = (TextView) findViewById(R.id.captureResult_text);
         mOutputDirText = (TextView) findViewById(R.id.cameraOutputDir_text);
+        mFileNameText = (EditText) findViewById(R.id.name_input);
     }
 
     @Override
@@ -468,6 +466,8 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
         mRecordingEnabled = !mRecordingEnabled;
         if (mRecordingEnabled) {
 
+
+
             String outputDir = renewOutputDir();
             String outputFile = outputDir + File.separator + "movie.mp4";
             String metaFile = outputDir + File.separator + "frame_timestamps.txt";
@@ -484,15 +484,28 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
                     outputDir + File.separator + "movie_metadata.csv");
 
             if (intSpeaker) {
-                mPlayer.start();
+
+                Handler handler = new Handler();
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        String wavFileName = mFileNameText.getText().toString();
+                        initAudioPlayer(wavFileName);
+                        mPlayer.start();
+                    }
+                }, 600);   // this should match the delay between pushing record and starting audio play in the python collection code.
             }
 
+
+
+
         } else {
+
+            mFileNameText.setText(null);
 
             if (intSpeaker && mPlayer.isPlaying()) {
                 mPlayer.pause();
                 mPlayer.reset();
-                initAudioPlayer();
             }
 
             mCamera2Proxy.stopRecordingCaptureResult();
@@ -510,6 +523,13 @@ public class CameraCaptureActivity extends CameraCaptureActivityBase
         });
 
         updateControls();
+    }
+
+
+    private void initAudioPlayer(String wavFileName) {
+        mPlayer = MediaPlayer.create(this, Uri.parse(Environment.getExternalStorageDirectory().
+                getAbsolutePath() + File.separator + "RSCorpus" + File.separator + wavFileName));
+        mPlayer.setLooping(false);
     }
 
     /**
