@@ -1,0 +1,1 @@
+This is the Android recording app used by the [Side Eye project](https://sideeyeattack.github.io/Website/)'s data collection. It is adapted from the [marslogger_android](https://github.com/OSUPCVLab/marslogger_android/tree/837abff3de25bc447b2451677e57979f2e98417e)
